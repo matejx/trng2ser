@@ -2,27 +2,25 @@
 PROJECT=main
 
 # libs dir
-LIBDIR=c:\users\matej\cloudstation\arm\stm32\lib
+LIBDIR=../../lib
 
 # STM32 stdperiph lib defines
-CDEFS = -DHSE_VALUE=((uint32_t)8000000) -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
+CDEFS=-DHSE_VALUE=8000000 -DSTM32F40_41xxx -DUSE_STDPERIPH_DRIVER
 
 #  List of the objects files to be compiled/assembled
-OBJECTS=main.o
-OBJECTS+=ser.o
-OBJECTS+=rng.o
+OBJECTS=main.o ser.o rng.o
 
-CMSIS_SOURCES = \
-$(LIBDIR)\cmsis\startup_stm32f40_41xxx.o \
-$(LIBDIR)\cmsis\system_stm32f4xx.o
+CMSIS_SOURCES=\
+$(LIBDIR)/cmsis/startup_stm32f40_41xxx.o \
+$(LIBDIR)/cmsis/system_stm32f4xx.o
 #$(LIBDIR)\cmsis\core_cm3.o
 
-STM_SOURCES = \
-$(LIBDIR)\stm32f4xx\src\misc.o \
-$(LIBDIR)\stm32f4xx\src\stm32f4xx_gpio.o \
-$(LIBDIR)\stm32f4xx\src\stm32f4xx_rcc.o \
-$(LIBDIR)\stm32f4xx\src\stm32f4xx_usart.o \
-$(LIBDIR)\stm32f4xx\src\stm32f4xx_rng.o
+STM_SOURCES=\
+$(LIBDIR)/stm32f4xx/src/misc.o \
+$(LIBDIR)/stm32f4xx/src/stm32f4xx_gpio.o \
+$(LIBDIR)/stm32f4xx/src/stm32f4xx_rcc.o \
+$(LIBDIR)/stm32f4xx/src/stm32f4xx_usart.o \
+$(LIBDIR)/stm32f4xx/src/stm32f4xx_rng.o
 
 OBJECTS+=$(CMSIS_SOURCES)
 OBJECTS+=$(STM_SOURCES)
@@ -38,7 +36,7 @@ GCFLAGS = -g$(DEBUG)
 GCFLAGS += $(CDEFS)
 GCFLAGS += -O$(OPTIMIZATION)
 GCFLAGS += -Wall -std=gnu99 -fno-common -mcpu=cortex-m3 -mthumb
-GCFLAGS += -I$(LIBDIR)\stm32f4xx\inc -I$(LIBDIR) -I$(LIBDIR)/cmsis
+GCFLAGS += -I$(LIBDIR)/stm32f4xx/inc -I$(LIBDIR) -I$(LIBDIR)/cmsis
 #GCFLAGS += -Wcast-align -Wcast-qual -Wimplicit -Wpointer-arith -Wswitch
 #GCFLAGS += -Wredundant-decls -Wreturn-type -Wshadow -Wunused
 LDFLAGS = -mcpu=cortex-m3 -mthumb -O$(OPTIMIZATION) -Wl,-Map=$(PROJECT).map -T$(LSCRIPT)
@@ -49,12 +47,16 @@ GCC = arm-none-eabi-gcc
 AS = arm-none-eabi-as
 LD = arm-none-eabi-ld
 OBJCOPY = arm-none-eabi-objcopy
-REMOVE = del
+ifeq ($(OS), Windows_NT)
+REMOVE = rm.py -f
+else
+REMOVE = rm -f
+endif
 SIZE = arm-none-eabi-size
 
 #########################################################################
 
-all:: $(PROJECT).hex $(PROJECT).bin stats
+all: $(PROJECT).hex $(PROJECT).bin stats
 
 $(PROJECT).bin: $(PROJECT).elf
 	$(OBJCOPY) -O binary -j .text -j .data $(PROJECT).elf $(PROJECT).bin
